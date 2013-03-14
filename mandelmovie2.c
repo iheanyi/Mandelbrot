@@ -104,19 +104,22 @@ int main(int argc, char* argv[]) {
 
 	while(counter < 50) {
 		// If the fork counter is less than defined amount, fork new process 
-		if(forkCounter < forkCount) {
+		if(forkCounter <= forkCount) {
 			pid = fork();
 
 			if(pid >= 0) {
 				if(pid == 0) {
 					//counter++;
 					//scale -= step;
+					forkCounter++;
+					counter++;
+					scale -= step;
+					printf("This damn counter %d and the scale %f\n", counter, scale);
 					printf("mandelmovie2: process %d started\n", getpid());
 					sprintf(commands[6], "-s %f", scale);
 					sprintf(commands[7], "-o mandel%d.bmp", counter);
 					execvp(commands[0], commands);
-					counter++;
-					scale -= step;
+
 				}
 			}
 
@@ -143,6 +146,7 @@ int main(int argc, char* argv[]) {
 				else {
 					printf("mandelmovie: process %d exited abnormally with status %d\n", result, status);
 				}
+				forkCounter--;
 			}
 		}
 
