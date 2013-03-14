@@ -1,8 +1,3 @@
-/* Iheanyi Ekechukwu and Justin Bartlett
-
-	Project 3: Mandelbrot Sets, awww yiss */
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -20,175 +15,129 @@
 #include <unistd.h>
 
 
-int numPics = 0;
+int counter = 0;
+float scale = 2.00000;
 int forkCounter = 0;
-//int counter = 0;
-
-float scale;
-float step;
-
-
-
-typedef struct {
-
-	int iteration;
-} mandel;
-
 int main(int argc, char* argv[]) {
 
-	int numProcesses = atoi(argv[1]);
+	int forkCount = atoi(argv[1]);
 
-	//pthread_t* threads = malloc(numProcesses * sizeof(pthread_t));
-
-	pid_t* processes = malloc(numProcesses * sizeof(pid_t));
-	int* statuses = malloc(numProcesses * sizeof(int));
-	pid_t p_id; // Parent ID
-    int status;
-
-    scale = 2.0000;
-    step = 0.0399999;
-
-	// ./mandel -x 0.135 -y 0.60 -W 900 -H 900 -s 0.000005 -m 1000
-
-    char* command[] = {"./mandel", "-x 0.135", "-y 0.60", "-W 900", "-H 900", "-m 1000", "-s 0.000005", ""};
-
-    char* words[100];
-
-    words[0] = "mandel";
-    words[1] = "-x 0.135";
-    words[2] = "-y 0.60";
-    words[3] = "-W 900";
-    words[4] = "-H 900";
-    words[5] = "-m 1000";
-    words[6] = "-s 0.000005";
-    words[7] = "-o mandeltest.bmp";
-
-    /*     words[0] = "mandel";
-    words[1] = "-x";
-    words[2] =  "0.135";
-    words[3] = "-y";
-    words[4] = "0.60";
-    words[5] = "-W";
-    words[6] = "900";
-    words[7] = "H";
-    words[8] = "900";
-    words[9] = "-m";
-    words[10] = "1000";
-    words[11] = "-s";
-    words[12] = "2.0"; */
-
-	int i;
-	int counter = 0;
-
-	// Initially fork the process multiple times, as designated from the command line
-	for(i = 0; i < numProcesses; ++i) {
-		p_id = fork();
-
-		printf("Initially forking\n");
-		//printf("Counting forks %d", counter);
+	printf("Fork Count: %d\n", forkCount);
 
 
-		if(p_id >= 0) {
+	pid_t* processes = malloc(forkCount * sizeof(pid_t));
+	pid_t pid; // Parent process id
+	int status;
 
-			if(p_id == 0) {
-				// Execvp junts here
-				printf("mandelmovie: process %d started with %d\n", getpid(), counter);
-				printf("Current Scale: %f\n", scale);
-		 		sprintf(words[6], "-s %f", scale);
-				sprintf(words[7], "mandel%d.bmp", counter);
+	float step = 0.0399999;
 
-				//printf("Comman")
-				execvp(words[0], words);
-				counter++;
+	counter = 0;
 
 
 
+	//char* command[100];
 
+	char* command[] = {"./mandel", "-x 0.135", "-y 0.60", "-W 900", "-H 900", "-m 1000", "-s 0.000005", "", ""};
+
+
+	char* commands[100];
+
+	//char* commands[] = {"./mandel", "-x 0.135", "-y 0.60", "-W 900", "-H 900", "-m 1000", "-s 0.000005", "CHANGINGCHANGINGCHANGINGCHANGING", ""};
+
+
+
+	commands[0] = "./mandel";
+	commands[1] = "-x 0.135";
+	commands[2] = "-y 0.60";
+	commands[3] = "-W 900";
+	commands[4] = "-H 900";
+	commands[5] = "-m 1000";
+	commands[6] = malloc(100 * sizeof(char));
+	commands[7] = malloc(100 * sizeof(char));
+	//command[0] = "./mandel";
+
+	//commands[7] = "-o mandeltest.bmp";
+
+	printf("Segging here?\n");
+	sprintf(commands[6], "-s %f", scale);
+	sprintf(commands[7], "-o mandel%d.bmp", counter);
+
+	printf("Before new Forking business?\n");
+
+	while(counter < 50) {
+
+		// If the fork counter is less than defined amount, fork new process 
+		if(forkCounter < forkCount) {
+
+			forkCounter++;
+			counter++;
+			scale -= step;
+			sprintf(commands[6], "-s %f", scale);
+			sprintf(commands[7], "-o mandel%d.bmp", counter);
+			printf("Fork Count: %d\n", forkCounter);
+
+			pid = fork();
+
+			if(pid >= 0) {
+
+				if(pid == 0) {
+					//counter++;
+					//scale -= step;
+					//printf("This damn counter %d and the scale %f\n", counter, scale);
+
+					printf("mandelmovie2: process %d started\n", getpid());
+
+					execvp(commands[0], commands);
+
+				}
 			}
 
 			else {
+				perror("Forking error!");
+				exit(1);
+			}
+		}
 
-				printf("%d\n", p_id);
-				counter++;
-				processes[i] = p_id;
+		// Else, wait for some junts to exit
+		else {
+			pid_t result = wait(&status);
+
+			if(result == -1) {
+				printf("mandelmovie: wait error %s\n", strerror(errno));
+				exit(1);			
 			}
 
+			else {
+				forkCounter--;
+				if(status == 0) {
+					printf("mandelmovie: process %d exited normally with status %d\n", result, WEXITSTATUS(status));
+				}
+
+				else {
+					printf("mandelmovie: process %d exited abnormally with status %d\n", result, status);
+				}
+			}
 		}
 
-		else {
-			perror("forking failed"); // Throw error
-            exit(1);
+
+	}
+	/*for(i = 0; i < forkCount; ++i) {
+		pid = fork();
+
+		if(pid >= 0) {
+			if(pid == 0) {
+				counter++;
+				scale -= step;
+				sprintf(commands[7], "-o mandel%d.bmp", counter);
+				sprintf(commands[6], "-s %f", scale);
+				execvp(commands[0], commands);
+			}
+
+			else {
+				processes[i] = pid;
+			}
 		}
-
-
-		 }
-
-		 int waiting;
-
-		 do {
-
-		 	printf("In Loop, Counter = %d\n", counter);
-		 	waiting = 0;
-		 	
-		 	for(i = 0; i < numProcesses; ++i) {
-		 		if(processes[i] > 0) {
-		 			// Should fork a new process if there aren't enough processes done
-
-		 			printf("Checking Processes\n");
-
-		 			pid_t exited = waitpid(processes[i], &status, 0);
-
-		 			printf("%d", exited);
-		 			if(exited == -1) {
-		 				printf("mandelmovie: wait error: %s", strerror(errno));
-		 			}
-
-		 			//else {
-	   		 		if(exited >= 0 && counter < 50) {
-		 				// Process is done, so fork a new one?
-
-			 				printf("Forking new process\n");
-			 				p_id = fork();
-
-							if(p_id >= 0) {
-								if(p_id == 0) {
-									// Execvp junts here
-
-									printf("Process Successfully Ran and Reforked!");
-		    						scale = scale - step;
-		   		 					sprintf(words[6], "-s %f", scale);
-		    						sprintf(words[7], "mandel%d.bmp", counter);
-		    						execvp(words[0], words);
-
-		    						counter++;
-		    					}
-
-		    					else {
-		    						processes[i] = 0;
-		    					}
-
-							}
-
-							else {
-								perror("new forking failed");
-								exit(1);
-							}
-		 			}
-
-
-
-		 			else {
-		 				//processes[i];
-		 				waiting = 1;
-		 			}
-
-		 			//}
-		 			sleep(1);
-		 		}
-		 	}
-
-		 } while(waiting && counter < 50);
-
+	}*/
 
 	return 0;
 }
