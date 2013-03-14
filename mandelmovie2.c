@@ -39,9 +39,11 @@ int main(int argc, char* argv[]) {
 	char* command[] = {"./mandel", "-x 0.135", "-y 0.60", "-W 900", "-H 900", "-m 1000", "-s 0.000005", "", ""};
 
 
-	//char* commands[100];
+	char* commands[100];
 
-	char* commands[] = {"./mandel", "-x 0.135", "-y 0.60", "-W 900", "-H 900", "-m 1000", "-s 0.000005", "CHANGINGCHANGINGCHANGINGCHANGING", ""};
+	//char* commands[] = {"./mandel", "-x 0.135", "-y 0.60", "-W 900", "-H 900", "-m 1000", "-s 0.000005", "CHANGINGCHANGINGCHANGINGCHANGING", ""};
+
+
 
 	commands[0] = "./mandel";
 	commands[1] = "-x 0.135";
@@ -50,6 +52,7 @@ int main(int argc, char* argv[]) {
 	commands[4] = "-H 900";
 	commands[5] = "-m 1000";
 	commands[6] = "-s 0.000005";
+	commands[7] = malloc(100 * sizeof(char));
 	//command[0] = "./mandel";
 
 	//commands[7] = "-o mandeltest.bmp";
