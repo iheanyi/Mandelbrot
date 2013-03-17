@@ -13,4 +13,3 @@ bitmap.o: bitmap.c
 
 clean:
 	rm -f mandel.o bitmap.o mandel
-	rm -f mandelmovie
