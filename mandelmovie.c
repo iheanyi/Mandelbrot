@@ -14,6 +14,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <math.h>
+#include <ctype.h>
 
 
 //  ffmpeg -f image2 -pattern_type sequence -start_number 1 -i mandel%01d.bmp test.mpg
@@ -26,6 +27,18 @@ float scale = 2.0000000;
 //float step = 0.01999995;
 int forkCounter = 0;
 int main(int argc, char* argv[]) {
+
+
+	if(argc != 2) {
+		printf("usage: mandelmovie <number of forks>\n");
+		exit(1);
+	}
+
+	if(isdigit(argv[1])) {
+		printf("Please enter a number as the argument.\n");
+		exit(1);
+	}
+
 
 	int forkCount = atoi(argv[1]);
 
@@ -47,6 +60,8 @@ int main(int argc, char* argv[]) {
 
 	//char* commands[] = {"./mandel", "-x 0.135", "-y 0.60", "-W 900", "-H 900", "-m 1000", "-s 0.000005", "CHANGINGCHANGINGCHANGINGCHANGING", ""};
 
+
+	// Command is ./mandel -x 0.135, -y 0.60 -W 900 -H 900 -m 1000 -s 0.000005 
 	time_t begin, end;
 	double time_spent;
 
