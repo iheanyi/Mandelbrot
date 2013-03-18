@@ -15,3 +15,13 @@
 *.exe
 *.out
 *.app
+mandel
+mandelmovie
+
+# Image files, movie files
+*.bmp
+*.mpg
+*.avi
+*.mpeg
+*.mp4
+
