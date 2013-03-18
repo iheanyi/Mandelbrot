@@ -34,10 +34,10 @@ int main(int argc, char* argv[]) {
 		exit(1);
 	}
 
-	if(isdigit(argv[1])) {
+	/*if(isdigit(argv[1])) {
 		printf("Please enter a number as the argument.\n");
 		exit(1);
-	}
+	}*/
 
 
 	int forkCount = atoi(argv[1]);
