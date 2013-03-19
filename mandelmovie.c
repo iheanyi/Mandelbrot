@@ -27,7 +27,7 @@ float scale = 2.0000000;
 //float step = 0.01999995;
 int forkCounter = 0;
 int main(int argc, char* argv[]) {
-	time_t begin = time(NULL);
+	//time_t begin = time(NULL);
 
 	if(argc != 2) {
 		printf("usage: mandelmovie <number of forks>\n");
@@ -154,8 +154,8 @@ int main(int argc, char* argv[]) {
 	}
 
 	end = time(NULL);
-	time_spent = end - begin;
+	//time_spent = end - begin;
 
-	printf("Time spent executing MandelMovie: %lf seconds. \n", time_spent);
+	//printf("Time spent executing MandelMovie: %lf seconds. \n", time_spent);
 	return 0;
 }

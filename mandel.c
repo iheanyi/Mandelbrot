@@ -50,10 +50,6 @@ void show_help()
 
 int main( int argc, char *argv[] )
 {
-	clock_t begin, end;
-	struct timespec start, finish;
-	//clock_gettime(CLOCK_MONOTONIC, &start);
-	begin = clock();
 	char c;
 
 	// These are the default configuration values used
@@ -168,11 +164,6 @@ int main( int argc, char *argv[] )
 	}
 
 
-	end = clock();
-	//clock_gettime(CLOCK_REALTIME, &finish);
-	double time_spent = (double) (end - begin) / CLOCKS_PER_SEC;
-
-	printf("Time spent executing Mandel: %lf seconds. \n", time_spent/numThreads);
 	return 0;
 }
 
