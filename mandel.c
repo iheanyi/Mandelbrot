@@ -6,10 +6,12 @@
 #include <stdio.h>
 #include <math.h>
 #include <errno.h>
+#include <time.h>
 #include <string.h>
 #include <pthread.h>
 
 int numThreads;
+
 
 typedef struct {
 	struct bitmap *bm;
@@ -18,6 +20,8 @@ typedef struct {
 	double ymin;
 	double ymax;
 	double itermax;
+	int height_start;
+	int height_finish;
 
 } thread_args;
 
@@ -46,6 +50,10 @@ void show_help()
 
 int main( int argc, char *argv[] )
 {
+	clock_t begin, end;
+	struct timespec start, finish;
+	//clock_gettime(CLOCK_MONOTONIC, &start);
+	begin = clock();
 	char c;
 
 	// These are the default configuration values used
@@ -97,7 +105,7 @@ int main( int argc, char *argv[] )
 	}
 
 	// Display the configuration of the image.
-	printf("mandel: x=%lf y=%lf scale=%lf max=%d outfile=%s\n",xcenter,ycenter,scale,max,outfile);
+	printf("mandel: x=%lf y=%lf scale=%lf max=%d outfile=%s numthreads=%d\n",xcenter,ycenter,scale,max,outfile, numThreads);
 
 	// Create a bitmap of the appropriate size.
 
@@ -105,9 +113,10 @@ int main( int argc, char *argv[] )
 
 	//int width_step = image_width/ numThreads;
 	int height_step = image_height / numThreads;
-	int height = 0; // Start at zero for  calculating each band
+	
+	//int height = height_step; // Start at zero for  calculating each band
 
-	height += height_step;
+	//height += height_step;
 
 	int i;
 
@@ -118,12 +127,12 @@ int main( int argc, char *argv[] )
 	// Create structure for arguments
 	thread_args* args = malloc(numThreads * sizeof(thread_args));
 
-
+	//args[0].height_start = 0;
+	struct bitmap *bm = bitmap_create(image_width, image_height);
+	//args->bm = bm;
 	for(i = 0; i < numThreads; ++i) {
-		struct bitmap *bm = bitmap_create(image_width, height);
-		bitmap_reset(bm,MAKE_RGBA(0,0,255,0));
 
-
+		//args[i].bm = bm;
 		args[i].bm = bm;
 		args[i].xmin = xcenter-scale;
 		args[i].xmax = xcenter+scale;
@@ -131,8 +140,17 @@ int main( int argc, char *argv[] )
 		args[i].ymax = ycenter+scale;
 		args[i].itermax = max;
 
+		if(i == 0) {
+			args[i].height_start = 0;
+			args[i].height_finish = height_step;
+		}
+
+		else {
+			args[i].height_start = args[i-1].height_finish;
+			args[i].height_finish= args[i-1].height_finish + height_step;
+		}
+
 		pthread_create(&threads[i], NULL, compute_image, (void*) &args[i]);
-		height += height_step;
 
 
 	}
@@ -149,6 +167,12 @@ int main( int argc, char *argv[] )
 		return 1;
 	}
 
+
+	end = clock();
+	//clock_gettime(CLOCK_REALTIME, &finish);
+	double time_spent = (double) (end - begin) / CLOCKS_PER_SEC;
+
+	printf("Time spent executing Mandel: %lf seconds. \n", time_spent/numThreads);
 	return 0;
 }
 
@@ -167,9 +191,12 @@ void* compute_image(void* a)
 	int width = bitmap_width(args->bm);
 	int height = bitmap_height(args->bm);
 
+	int hStart = args->height_start;
+	int hFinish = args->height_finish;
+
 	// For every pixel in the image...
 
-	for(j=0;j<height;j++) {
+	for(j=hStart;j<hFinish;j++) {
 
 		for(i=0;i<width;i++) {
 
@@ -184,6 +211,7 @@ void* compute_image(void* a)
 			bitmap_set(args->bm,i,j,iters);
 		}
 	}
+
 
 	return 0;
 }

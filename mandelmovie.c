@@ -27,7 +27,7 @@ float scale = 2.0000000;
 //float step = 0.01999995;
 int forkCounter = 0;
 int main(int argc, char* argv[]) {
-
+	time_t begin = time(NULL);
 
 	if(argc != 2) {
 		printf("usage: mandelmovie <number of forks>\n");
@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
 
 
 	// Command is ./mandel -x 0.135, -y 0.60 -W 900 -H 900 -m 1000 -s 0.000005 
-	time_t begin, end;
+	time_t end;
 	double time_spent;
 
 
@@ -76,6 +76,7 @@ int main(int argc, char* argv[]) {
 	commands[6] = malloc(100 * sizeof(char));	// Malloc space for the scale
 	commands[7] = "-o";
 	commands[8] = malloc(100 * sizeof(char));	// Malloc space for the filename
+	commands[9] = NULL;
 
 
 	// Was segfaulting earlier, but I fixed it.
@@ -87,7 +88,6 @@ int main(int argc, char* argv[]) {
 
 	// Looping for executing
 
-	begin = time(NULL);
 	while(counter < 50) {
 
 		// If the fork counter is less than defined amount, fork new process 
@@ -111,7 +111,11 @@ int main(int argc, char* argv[]) {
 				if(pid == 0) {
 					//printf("mandelmovie2: process %d started\n", getpid());
 
-					execvp(commands[0], commands);
+					int execResult = execvp(commands[0], commands);
+					if(execResult == -1) {
+						printf("mandel: command error: %s\n", strerror(errno));
+						exit(EXIT_FAILURE);
+					}
 
 				}
 			}
@@ -124,6 +128,7 @@ int main(int argc, char* argv[]) {
 
 		// Else, wait for some junts to exit
 		else {
+			
 			pid_t result = wait(&status);
 
 			if(result == -1) {
@@ -151,6 +156,6 @@ int main(int argc, char* argv[]) {
 	end = time(NULL);
 	time_spent = end - begin;
 
-	printf("Time spent executing: %lf\n", time_spent);
+	printf("Time spent executing MandelMovie: %lf seconds. \n", time_spent);
 	return 0;
 }
